@@ -1,8 +1,9 @@
 {
   "name": "demyashev/php.wow-srp6",
   "version": "0.0.1",
+  "type": "library",
   "description": "",
-  "keywords": [],
+  "keywords": ["srp", "srp6", "wow", "php", "php84"],
   "homepage": "https://github.com/demyashev/php.wow-srp6",
   "license": "MIT",
   "authors": [
