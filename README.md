@@ -36,7 +36,7 @@ $A = $srp->calculate_client_public_key($a);
 # client S key
 $x = $srp->calculate_x($username, $password, $s);
 $u = $srp->calculate_u($A, $B);
-$c_S = $srp->calculate_client_S_key($a, $B, $x, $u);
+$c_S = $srp->calculate_client_s_key($a, $B, $x, $u);
 
 # client session key
 $c_K = $srp->calculate_interleaved($c_S);
@@ -46,7 +46,7 @@ $c_M1 = $srp->calculate_client_proof($username, $c_K, $A, $B, $s);
 # 5. [LogonProof] LS -> client: M2
 # server S key
 $u = $srp->calculate_u($A, $B);
-$s_S = $srp->calculate_server_S_key($A, $v, $u, $b);
+$s_S = $srp->calculate_server_s_key($A, $v, $u, $b);
 
 # server session key
 $s_K = $srp->calculate_interleaved($s_S);
