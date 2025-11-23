@@ -9,48 +9,50 @@ use GMP;
 class SRP
 {
     /**
-     * @var GMP
+     * @var GMP [N] Constant
      */
     public GMP $N;
 
     /**
-     * [g]
-     *
-     * @var GMP
+     * @var GMP [g] Constant
      */
     public GMP $g;
 
     /**
-     * [k]
-     *
-     * @var GMP
+     * @var GMP [k] Constant
      */
     public GMP $k;
 
     /**
-     * little endian of 20 bytes (SHA-1 hash)
-     *
-     * @var GMP
+     * @var GMP little endian of 20 bytes
      */
     public GMP $xor;
 
-    public string $hasher = 'sha1';
+    /**
+     * @var string Hash lib name
+     */
+    public string $hasher;
 
     public function __construct(
         ?GMP $N = null,
         ?GMP $g = null,
         ?GMP $k = null,
-        ?GMP $xor = null
+        ?GMP $xor = null,
+        ?string $hasher = null
     )
     {
         $this->k = $k ?? gmp_init(3, 10);
         $this->g = $g ?? gmp_init(7, 10);
         $this->N = $N ?? gmp_init('894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7', 16);
         $this->xor = $xor ?? gmp_init('A7C27B6C96CA6F505A7C98031173AC383AB07BDD', 16);
+        $this->hasher = $hasher ?? 'sha1';
     }
 
     /**
      * [x] = sha1( s | sha1( U | : | p ))
+     *
+     * @link https://gtker.com/implementation-guide-for-the-world-of-warcraft-flavor-of-srp6/verification_values/calculate_x_salt_values.txt
+     * @link https://gtker.com/implementation-guide-for-the-world-of-warcraft-flavor-of-srp6/verification_values/calculate_x_values.txt
      *
      * @param string $username
      * @param string $password
@@ -73,6 +75,8 @@ class SRP
     /**
      * [v] = g^x % N
      *
+     * @link https://gtker.com/implementation-guide-for-the-world-of-warcraft-flavor-of-srp6/verification_values/calculate_v_values.txt
+     *
      * @param string $username
      * @param string $password
      * @param string $salt little endian binary string of 32 bytes
@@ -93,6 +97,8 @@ class SRP
     /**
      * [B] = (k * v + (g^b % N)) % N
      *
+     * @link https://gtker.com/implementation-guide-for-the-world-of-warcraft-flavor-of-srp6/verification_values/calculate_B_values.txt
+     *
      * @param string $verifier little endian binary string of 32 bytes
      * @param string $serverPrivateKey little endian binary string of 32 bytes
      *
@@ -110,6 +116,8 @@ class SRP
 
     /**
      * [S] = (B - (k * (g^x % N)))^(a + u * x) % N
+     *
+     * @link https://gtker.com/implementation-guide-for-the-world-of-warcraft-flavor-of-srp6/verification_values/calculate_client_S_values.txt
      *
      * @param string $clientPrivateKey little endian binary string of 32 bytes
      * @param string $serverPublicKey little endian binary string of 32 bytes
@@ -133,6 +141,8 @@ class SRP
     /**
      * [S] = (A * (v^u % N))^b % N
      *
+     * @link https://gtker.com/implementation-guide-for-the-world-of-warcraft-flavor-of-srp6/verification_values/calculate_S_values.txt
+     *
      * @param string $A
      * @param string $v
      * @param string $u
@@ -155,6 +165,8 @@ class SRP
     /**
      * [u] = sha1( A | B )
      *
+     * @link https://gtker.com/implementation-guide-for-the-world-of-warcraft-flavor-of-srp6/verification_values/calculate_u_values.txt
+     *
      * @param string $A little endian binary string of 32 bytes
      * @param string $B little endian binary string of 32 bytes
      *
@@ -170,6 +182,9 @@ class SRP
 
     /**
      * [K] = SHA_Interleave(S)
+     *
+     * @link https://gtker.com/implementation-guide-for-the-world-of-warcraft-flavor-of-srp6/verification_values/calculate_interleaved_values.txt
+     * @link https://gtker.com/implementation-guide-for-the-world-of-warcraft-flavor-of-srp6/verification_values/calculate_split_s_key.txt
      *
      * @param string $s little endian binary string of 32 bytes
      *
@@ -263,6 +278,8 @@ class SRP
 
     /**
      * [A] = g^a % N
+     *
+     * @link https://gtker.com/implementation-guide-for-the-world-of-warcraft-flavor-of-srp6/verification_values/calculate_A_values.txt
      *
      * @param string $a little endian binary string of 32 bytes
      *
