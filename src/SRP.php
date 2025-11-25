@@ -192,6 +192,7 @@ class SRP
      */
     public function calculate_interleaved(string $s): string
     {
+        $s = strrev($s);
         $length = strlen($s);
 
         for ($i = 0; $i < $length; $i++)
@@ -230,7 +231,7 @@ class SRP
             $K[$i * 2 + 1] = $H[$i];
         }
 
-        return $K;
+        return strrev($K);
     }
 
     /**

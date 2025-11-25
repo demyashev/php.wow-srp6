@@ -124,8 +124,8 @@ class SRPTest extends TestCase
     {
         $srp = new SRP();
 
-        $s_key = hex2bin('8F4CEBD60DFC34E5C007E51BD4F3A4FF2BC1D930E2D3EA770D8D3EEDFF2DCCFC');
-        $expected = hex2bin('EE144E1AE08DAC891AB63ABC42BF89738003343422E6B58131BEE4C3087A7027E55A7216D18D556C');
+        $s_key = hex2bin('5199ED9CA852C03167A5BB7AB502D37603A281679B6D07E12E84C0F69C9AA84C');
+        $expected = hex2bin('3612544A88232B29E510F7F2CA257C79D4172037CBE6359C6A3B718696F20D76DABDBACE0FF9FCEB');
 
         $key = $srp->calculate_interleaved($s_key);
 
@@ -228,5 +228,87 @@ class SRPTest extends TestCase
         $world_server_proof = $srp->calculate_world_server_proof($username, $client_seed, $server_seed, $session_key);
 
         $this->assertEquals($expected, $world_server_proof);
+    }
+
+    public function testFinal(): void
+    {
+        $srp = new SRP();
+
+        $username = 'username123';
+        $password = 'password123';
+
+        $request_c_to_s = '0113db66d21d66996cfab018b95e114d99abcbb3ec7e5c5e069cd3f89f76579c0e06fde5e7328f14e03615560990c0b04ab8619af0521f00afa66393866fc593bfa140aa50636e22cd0000';
+
+        $client_s = 'cd226e6350aa40a1bf93c56f869363a6af001f52bb4d281f177c256c708b971f';
+        $client_v = '0484a03b682d30a31310c1dd5eaa09ff5e1495cc442c31fbd2677d6b21e3e954';
+        $client_a = '78f8d582b78880f7dd55a72cb2e89da25f9581f8610761e8f44736bb868216a4';
+        $client_A = '314c456ad4785662771e766e6997f5b02a3b1069ac3fc8c31b28b859e0c88498';
+        $client_u = '607cf9998143f60e7178fc3cc612827b373d1849';
+        $client_x = 'bb452921bbc4c73c0a59a9bcdb50174ae05c78af';
+        $client_S = '5199ed9ca852c03167a5bb7ab502d37603a281679b6d07e12e84c0f69c9aa84c';
+        $client_K = '000a77d8c5bf85c06632b019774542dd0069b41d56fd8cd02a57ad89c2388221ae1a3b6974437bda';
+        $client_M1= 'a42338aef407abfefeee8d744b9e7b08fba1c875';
+
+        $request_s_to_c_s   = '1f978b706c257c171f284dbb521f00afa66393866fc593bfa140aa50636e22cd';
+        $request_s_to_c_B   = '5d5afeccd4ac65b6211dcfc06f1ca144576b0f5151455f65d9e11bb1ebd3531b';
+        $request_s_to_c_crc = 'baa31e99a00b2157fc373fb369cdd2f1';
+
+        $server_s = 'CD226E6350AA40A1BF93C56F869363A6AF001F52BB4D281F177C256C708B971F';
+        $server_v = '0484A03B682D30A31310C1DD5EAA09FF5E1495CC442C31FBD2677D6B21E3E954';
+        $server_A = '314C456AD4785662771E766E6997F5B02A3B1069AC3FC8C31B28B859E0C88498';
+        $server_b = 'C467F49EEF52D9FDE4BF452AC4EA10EB21B3C5';
+        $server_B = '1B53D3EBB11BE1D9655F4551510F6B5744A11C6FC0CF1D21B665ACD4CCFE5A5D';
+        $server_S = '5199ED9CA852C03167A5BB7AB502D37603A281679B6D07E12E84C0F69C9AA84C';
+        $server_K = '3612544A88232B29E510F7F2CA257C79D4172037CBE6359C6A3B718696F20D76DABDBACE0FF9FCEB';
+        $server_M2 ='7A0C28C344EE2652511F06D1820E56CB35A3FD12';
+
+        // инициализируем из данных запроса
+        $s = strrev(hex2bin($request_s_to_c_s));
+        $B = strrev(hex2bin($request_s_to_c_B));
+
+        // инициализируем из памяти сервера
+        $a = hex2bin($client_a);
+        $b = hex2bin($server_b);
+
+        $A = $srp->calculate_client_public_key($a);
+
+        $this->assertEquals($client_A, bin2hex($A));
+
+        // серверная часть
+        $v = $srp->calculate_password_verifier($username, $password, $s);
+        $u = $srp->calculate_u($A, $B);
+        $x = $srp->calculate_x($username, $password, $s);
+
+        $this->assertEqualsIgnoringCase($server_v, bin2hex($v));
+
+
+        $B = $srp->calculate_server_public_key($v, $b);
+
+        $this->assertEqualsIgnoringCase($server_B, bin2hex($B));
+
+        $s_S = $srp->calculate_server_s_key($A, $v, $u, $b);
+
+        $this->assertEqualsIgnoringCase($server_S, bin2hex($s_S));
+
+        $s_K = $srp->calculate_interleaved($s_S);
+
+        $this->assertEqualsIgnoringCase(hex2bin($server_K), $s_K);
+
+        $s_M1 = $srp->calculate_client_proof($username, $s_K, $A, $B, $s);
+
+        $this->assertEqualsIgnoringCase($server_M2, bin2hex($s_M1));
+        // сервераня часть -- сходится
+
+
+        // клиентская часть
+        $c_S = $srp->calculate_client_s_key($a, $B, $x, $u);
+
+        $c_K = $srp->calculate_interleaved($c_S);
+
+        $c_M1 = $srp->calculate_client_proof($username, $c_K, $A, $B, $s);
+
+        $this->assertEquals(bin2hex($s_M1), bin2hex($c_M1));
+
+        // клиентская часть -- сходится
     }
 }
