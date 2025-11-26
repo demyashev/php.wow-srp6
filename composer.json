@@ -1,6 +1,6 @@
 {
   "name": "demyashev/php.wow-srp6",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "type": "library",
   "description": "A PHP library for generating authorization keys and encrypting data for World of Warcraft",
   "keywords": ["srp", "srp6", "wow", "php", "php84", "wotlk", "3.3.5a"],
