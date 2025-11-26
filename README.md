@@ -2,7 +2,7 @@
 
 A PHP library for generating authorization keys and encrypting data for World of Warcraft.
 
-It can be used to register a client in the database, connect to the server, and send/receive encrypted data packets.
+It can be used to register a client in the database, connect to the server and encrypt/decrypt data packets.
 # Usage
 
 A step-by-step usage example. For a local CMaNGOS server, simply generate `$s` and `$v` and write them to the corresponding fields in the `wotlkrealmd.account` table.
