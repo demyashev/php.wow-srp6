@@ -1,9 +1,9 @@
 {
   "name": "demyashev/php.wow-srp6",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "library",
-  "description": "",
-  "keywords": ["srp", "srp6", "wow", "php", "php84"],
+  "description": "A PHP library for generating authorization keys and encrypting data for World of Warcraft",
+  "keywords": ["srp", "srp6", "wow", "php", "php84", "wotlk", "3.3.5a"],
   "homepage": "https://github.com/demyashev/php.wow-srp6",
   "license": "MIT",
   "authors": [
@@ -18,9 +18,6 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^12.4"
-  },
-  "suggest": {
-    "ext-curl": "If you use CURLRequest class"
   },
   "autoload": {
     "psr-4": {
